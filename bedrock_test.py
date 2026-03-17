@@ -1,11 +1,19 @@
 import google.generativeai as genai
 import os
+from dotenv import load_dotenv
 
-# 1. Configuration
-genai.configure(api_key="AIzaSyBNW0gWEbU077Qy1rO3iPA5d6Ez3eX_dow")
+# 1. Configuration - Loads from your hidden .env file
+load_dotenv()
+api_key = os.getenv("GOOGLE_API_KEY")
+
+if not api_key:
+    print("❌ Error: GOOGLE_API_KEY not found in .env file.")
+else:
+    genai.configure(api_key=api_key)
 
 def generate_and_save_solutions():
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    # Note: Updated to a standard model name to avoid errors
+    model = genai.GenerativeModel('gemini-1.5-flash')
     
     # Path to your data
     file_path = os.path.join("Jenson USA", "Bikes - load data.sql")
@@ -29,7 +37,7 @@ def generate_and_save_solutions():
     response = model.generate_content(prompt)
     solutions_text = response.text
     
-    # Remove any markdown formatting if the AI added it (like ```sql)
+    # Remove any markdown formatting
     clean_sql = solutions_text.replace("```sql", "").replace("```", "")
 
     # Save to a new file
@@ -40,8 +48,9 @@ def generate_and_save_solutions():
     return f"✅ Success! Solutions saved to: {output_filename}"
 
 # --- EXECUTION ---
-try:
-    status = generate_and_save_solutions()
-    print(status)
-except Exception as e:
-    print(f"❌ Error: {e}")
+if __name__ == "__main__":
+    try:
+        status = generate_and_save_solutions()
+        print(status)
+    except Exception as e:
+        print(f"❌ Error: {e}")
